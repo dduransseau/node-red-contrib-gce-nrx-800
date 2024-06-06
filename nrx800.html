@@ -1,7 +1,7 @@
 <script type="text/x-red" data-template-name="nrx800 relay">
     <div class="form-row">
         <label for="node-input-number" class="l-width">Number</label>
-        <select id="node-input-number" style="width:75px">
+        <select id="node-input-number" style="width:125px">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -10,6 +10,7 @@
             <option value="6">6</option>
             <option value="7">7</option>
             <option value="8">8</option>
+            <option value="msg">On message</option>
         </select>
     </div>
 </script>
@@ -20,17 +21,17 @@
         icon: "font-awesome/fa-microchip",
         defaults: {
             number: {
-                value: "", required:true
+                value: "msg", required:true
             }
         },
         inputs: 1,
         outputs: 1,
         paletteLabel: 'Relay',
         label: function () {
-            if (this.number) {
+            if (this.number && this.number !== "msg") {
                 return 'NRX-800 Relay '+ this.number;
             }
-            return 'NRX-800 Relay';
+            return 'NRX-800 Relays';
         },
     });
 
