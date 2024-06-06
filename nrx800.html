@@ -1,0 +1,91 @@
+<script type="text/x-red" data-template-name="nrx800 relay">
+    <div class="form-row">
+        <label for="node-input-number" class="l-width">Number</label>
+        <select id="node-input-number" style="width:75px">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="9">8</option>
+        </select>
+    </div>
+</script>
+<script type='text/javascript'>
+    RED.nodes.registerType('nrx800 relay', {
+        category: 'GCE NRX\u2013800',
+        color: '#80c600',
+        icon: "font-awesome/fa-microchip",
+        defaults: {
+            number: {
+                value: "", required:true
+            }
+        },
+        inputs: 1,
+        outputs: 0,
+        paletteLabel: 'Relay',
+        label: function () {
+            if (this.number) {
+                return 'NRX-800 Relay '+ this.number;
+            }
+            return 'NRX-800 Relay';
+        },
+    });
+
+</script>
+
+<script type="text/x-red" data-template-name="nrx800 input">
+    <div class="form-row">
+        <label for="node-input-number" class="l-width">Number</label>
+        <select id="node-input-number" style="width:75px">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="9">8</option>
+        </select>
+    </div>
+</script>
+<script type='text/javascript'>
+    RED.nodes.registerType('nrx800 input', {
+        category: 'GCE NRX\u2013800',
+        color: '#80c600',
+        icon: "font-awesome/fa-microchip",
+        defaults: {
+            number: {
+                value: "", required:true
+            }
+        },
+        inputs: 0,
+        outputs: 1,
+        paletteLabel: 'Digital input',
+        label: function () {
+            if (this.number) {
+                return 'NRX-800 Input '+ this.number;
+            }
+            return 'NRX-800 Input';
+        },
+    });
+
+</script>
+
+<script type='text/javascript'>
+    RED.nodes.registerType('nrx800 inputs', {
+        category: 'GCE NRX\u2013800',
+        color: '#80c600',
+        icon: "font-awesome/fa-microchip",
+        defaults: {        },
+        inputs: 0,
+        outputs: 1,
+        paletteLabel: 'Digital inputs',
+        label: function () {
+            return 'NRX-800 Inputs';
+        },
+    });
+
+</script>
