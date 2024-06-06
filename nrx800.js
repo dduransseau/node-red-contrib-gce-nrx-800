@@ -66,31 +66,34 @@ module.exports = function(RED) {
 
         function inputlistener(msg) {
             // node.log('Received message '+msg.payload+" for relay "+node.relay);
-            if (msg.payload === "true") { msg.payload = true; }
-            if (msg.payload === "false") { msg.payload = false; }
+            if (msg.payload === "true") { msg.payload = 1; }
+            if (msg.payload === "false") { msg.payload = 0; }
             var out = Number(msg.payload);
-            var pio = node.pio;
-
-            if (msg.relay !== undefined){
-                var relayNumber = parseInt(msg.relay)
-                if (0 < relayNumber < 9){
-                    node.debug("Received message for relay "+ relayNumber)
-                    node.relay = msg.relay
-                    pio = relayNumberPinMapping[msg.relay]
-                } else {
-                    node.warn("Received invalid relay number "+relayNumber);
-                    return
-                }
-            }
-
             if (out === 0 || out === 1){
-                node.debug('Set relay '+ node.relay + " to "+out+" on pin "+pio);
+                var pio = node.pio;
+                var relay = node.relay;
+
+                // Confirm that node is configured to listen on multiple relay to avoid chaotic behavior
+                if (msg.relay !== undefined && node.relay === "msg"){
+                    var relayNumber = parseInt(msg.relay)
+                    if (0 < relayNumber < 9){
+                        node.debug("Received message for relay "+ relayNumber)
+                        relay = msg.relay
+                        pio = relayNumberPinMapping[msg.relay]
+                    } else {
+                        node.warn("Received invalid relay number "+relayNumber);
+                        return
+                    }
+                }
+
+
+                node.debug('Set relay '+ relay + " to "+out+" on pin "+pio);
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 PiGPIO.write(pio, out);
                 node.status({fill:"grey",shape:"ring",text:relayStatusMapping[out]});
-                node.send({ topic:"nrx800/relay/"+node.relay, relay:parseInt(node.relay), payload:relayStatusMapping[out], host:node.host });
+                node.send({ topic:"nrx800/relay/"+relay, relay:parseInt(relay), payload:relayStatusMapping[out], host:node.host });
             }
-            else { node.warn(RED._("pi-gpiod:errors.invalidinput")+": "+out); }
+            else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
         }
 
         if (node.relay !== undefined) {
@@ -111,6 +114,7 @@ module.exports = function(RED) {
                                 PiGPIO.set_mode(relayNumberPinMapping[relayNumber], PiGPIO.OUTPUT);
                             }
                         } else {
+                            node.debug("Setup relay "+ node.relay+" on pin "+node.pio)
                             PiGPIO.set_mode(node.pio,PiGPIO.OUTPUT);
                         }
                         node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
