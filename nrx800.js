@@ -47,7 +47,7 @@ module.exports = function(RED) {
 
     const digitalInputPinMapping = objectFlip(digitalInputNumberPinMapping)
 
-    const relayStatusMappinp = {
+    const relayStatusMapping = {
         0: "OPEN",
         1: "CLOSED"
     }
@@ -84,10 +84,11 @@ module.exports = function(RED) {
             // }
 
             if (out === 0 || out === 1){
-                node.log('Set relay '+ node.relay + " to "+out);
+                node.debug('Set relay '+ node.relay + " to "+out);
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 PiGPIO.write(node.pio, out);
-                node.status({fill:"grey",shape:"ring",text:relayStatusMappinp[out]});
+                node.status({fill:"grey",shape:"ring",text:relayStatusMapping[out]});
+                node.send({ topic:"nrx800/relay/"+node.relay, relay:parseInt(node.relay), payload:relayStatusMapping[out], host:node.host });
             }
             else { node.warn(RED._("pi-gpiod:errors.invalidinput")+": "+out); }
         }
