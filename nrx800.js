@@ -52,6 +52,11 @@ module.exports = function(RED) {
         1: "CLOSED"
     }
 
+    const ledStatusMapping = {
+        0: "ON",
+        1: "OFF"
+    }
+
     function Relay(n) {
         RED.nodes.createNode(this,n);
         this.host = n.host || defaultHost;
@@ -85,8 +90,6 @@ module.exports = function(RED) {
                         return
                     }
                 }
-
-
                 node.debug('Set relay '+ relay + " to "+out+" on pin "+pio);
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 PiGPIO.write(pio, out);
@@ -136,6 +139,65 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("nrx800 relay",Relay);
+
+
+    function LedUser(n) {
+        RED.nodes.createNode(this,n);
+        this.host = n.host || defaultHost;
+        this.port = n.port || defaultPort;
+        this.pio = 19;
+        this.level = parseInt(n.level || 0);
+        this.out = n.out || "out";
+        this.freq = parseInt(n.freq) || 800;
+        var node = this;
+        var PiGPIO;
+
+        function inputlistener(msg) {
+            // node.log('Received message '+msg.payload+" for relay "+node.relay);
+            if (msg.payload === "true") { msg.payload = 1; }
+            if (msg.payload === "false") { msg.payload = 0; }
+            if (msg.payload === "ON") { msg.payload = 1; }
+            if (msg.payload === "OFF") { msg.payload = 0; }
+            var out = Number(msg.payload);
+            if (out === 0 || out === 1){
+                out = revertDigitalInput(out);
+                node.debug("Set user led to "+ledStatusMapping[out]);
+                if (RED.settings.verbose) { node.log("out: "+msg.payload); }
+                PiGPIO.write(node.pio, out);
+                node.status({fill:"grey",shape:"ring",text:ledStatusMapping[out]});
+                node.send({ topic:"nrx800/led/user", payload:ledStatusMapping[out], host:node.host });
+            }
+            else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false,ON,OFF)") }
+        }
+
+        PiGPIO = new Pigpio();
+        var inerror = false;
+        var run = function() {
+            PiGPIO.pi(node.host, node.port, function(err) {
+                if (err) {
+                    node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
+                    if (!inerror) { node.error(err,err); inerror = true; }
+                    node.retry = setTimeout(function() { run(); }, 5000);
+                }
+                else {
+                    inerror = false;
+                    node.debug("Setup user led")
+                    PiGPIO.set_mode(node.pio, PiGPIO.OUTPUT);
+                    node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
+                }
+            });
+        }
+        run();
+        node.on("input", inputlistener);
+
+        node.on("close", function(done) {
+            if (node.retry) { clearTimeout(node.retry); }
+            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
+            PiGPIO.close();
+            done();
+        });
+    }
+    RED.nodes.registerType("nrx800 led-user", LedUser);
 
     function DigitalInput(n) {
         RED.nodes.createNode(this,n);

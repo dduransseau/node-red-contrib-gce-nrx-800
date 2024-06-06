@@ -90,3 +90,19 @@
     });
 
 </script>
+
+<script type='text/javascript'>
+    RED.nodes.registerType('nrx800 led-user', {
+        category: 'GCE NRX\u2013800',
+        color: '#80c600',
+        icon: "font-awesome/fa-microchip",
+        defaults: {},
+        inputs: 1,
+        outputs: 1,
+        paletteLabel: 'User led',
+        label: function () {
+            return 'NRX-800 user led';
+        },
+    });
+
+</script>
