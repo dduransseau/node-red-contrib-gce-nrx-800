@@ -1,3 +1,0 @@
-[submodule "@dduransseau/js-pigpio"]
-	path = node_modules/js-pigpio
-	url = https://github.com/dduransseau/js-pigpio.git
