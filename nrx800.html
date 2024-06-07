@@ -49,6 +49,7 @@
             <option value="6">6</option>
             <option value="7">7</option>
             <option value="8">8</option>
+            <option value="all">All</option>
         </select>
     </div>
 </script>
@@ -66,25 +67,9 @@
         outputs: 1,
         paletteLabel: 'Digital input',
         label: function () {
-            if (this.number) {
+            if (this.number && this.number !== "all") {
                 return 'NRX-800 Input '+ this.number;
             }
-            return 'NRX-800 Input';
-        },
-    });
-
-</script>
-
-<script type='text/javascript'>
-    RED.nodes.registerType('nrx800 inputs', {
-        category: 'GCE NRX\u2013800',
-        color: '#80c600',
-        icon: "font-awesome/fa-microchip",
-        defaults: {        },
-        inputs: 0,
-        outputs: 1,
-        paletteLabel: 'Digital inputs',
-        label: function () {
             return 'NRX-800 Inputs';
         },
     });
@@ -104,5 +89,4 @@
             return 'NRX-800 user led';
         },
     });
-
 </script>

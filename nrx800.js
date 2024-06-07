@@ -63,9 +63,6 @@ module.exports = function(RED) {
         this.port = n.port || defaultPort;
         this.relay = n.number;
         this.pio = relayNumberPinMapping[n.number];
-        this.level = parseInt(n.level || 0);
-        this.out = n.out || "out";
-        this.freq = parseInt(n.freq) || 800;
         var node = this;
         var PiGPIO;
 
@@ -140,15 +137,87 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("nrx800 relay",Relay);
 
+    function DigitalInput(n) {
+        RED.nodes.createNode(this,n);
+        this.host = n.host || defaultHost;
+        this.port = n.port || defaultPort;
+        this.input = n.number;
+        this.pio = digitalInputNumberPinMapping[n.number];
+        this.intype = "PUD_OFF";
+        this.read = n.read || true;
+        this.debounce = Number(n.debounce || 25);
+        var node = this;
+        node.callbacks = [];
+        var PiGPIO;
+
+        function setupDigitalInputGpio(instance, pin){
+            instance.set_mode(pin,instance.INPUT);
+            instance.set_glitch_filter(pin,node.debounce);
+            node.callbacks.push(PiGPIO.callback(pin, instance.EITHER_EDGE, function (gpio, level, tick) {
+                var input = digitalInputPinMapping[gpio]
+                node.debug('Received status '+level+" for input "+input+" on gpio "+gpio);
+                node.send({ topic:"nrx800/input/"+input, input:parseInt(input), payload:revertDigitalInput(level), host:node.host });
+                node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
+            }))
+        }
+
+        if (node.input !== undefined) {
+            PiGPIO = new Pigpio();
+            var inerror = false;
+            var run = function() {
+                PiGPIO.pi(node.host, node.port, function(err) {
+                    if (err) {
+                        node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
+                        if (!inerror) { node.error(err); inerror = true; }
+                        node.retry = setTimeout(function() { run(); }, 5000);
+                    }
+                    else {
+                        inerror = false;
+                        // Set specific digital input
+                        if (node.pio !== undefined) {
+                            setupDigitalInputGpio(PiGPIO, node.pio)
+                            // Read status of input on deploy
+                            if (node.read) {
+                                setTimeout(function() {
+                                    PiGPIO.read(node.pio, function(err, level) {
+                                        node.send({ topic:"nrx800/input/"+node.input, input:parseInt(node.input), payload:revertDigitalInput(level), host:node.host });
+                                        node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
+                                    });
+                                }, 20);
+                            }
+                        } // Set all digital input
+                        else {
+                            for (let input in digitalInputNumberPinMapping){
+                                const pio = digitalInputNumberPinMapping[input]
+                                node.debug("Iterate over input "+input+" on pin "+pio)
+                                setupDigitalInputGpio(PiGPIO, pio)
+                            }
+                        }
+                        node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
+                    }
+                });
+            }
+            run();
+        }
+        else {
+            node.warn(RED._("pi-gpiod:errors.invalidpin")+": "+node.pio);
+        }
+
+        node.on("close", function(done) {
+            if (node.retry) { clearTimeout(node.retry); }
+            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
+            node.callbacks.forEach((element) => element.cancel());
+            PiGPIO.close();
+            done();
+        });
+    }
+    RED.nodes.registerType("nrx800 input",DigitalInput);
 
     function LedUser(n) {
         RED.nodes.createNode(this,n);
         this.host = n.host || defaultHost;
         this.port = n.port || defaultPort;
         this.pio = 19;
-        this.level = parseInt(n.level || 0);
-        this.out = n.out || "out";
-        this.freq = parseInt(n.freq) || 800;
         var node = this;
         var PiGPIO;
 
@@ -199,121 +268,6 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("nrx800 led-user", LedUser);
 
-    function DigitalInput(n) {
-        RED.nodes.createNode(this,n);
-        this.host = n.host || defaultHost;
-        this.port = n.port || defaultPort;
-        this.input = n.number;
-        this.pio = digitalInputNumberPinMapping[n.number];
-        this.intype = "PUD_OFF";
-        this.read = n.read || true;
-        this.debounce = Number(n.debounce || 25);
-        var node = this;
-        var PiGPIO;
-
-        if (node.pio !== undefined) {
-            PiGPIO = new Pigpio();
-            var inerror = false;
-            var run = function() {
-                PiGPIO.pi(node.host, node.port, function(err) {
-                    if (err) {
-                        node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
-                        if (!inerror) { node.error(err); inerror = true; }
-                        node.retry = setTimeout(function() { run(); }, 5000);
-                    }
-                    else {
-                        inerror = false;
-                        PiGPIO.set_mode(node.pio,PiGPIO.INPUT);
-                        PiGPIO.set_glitch_filter(node.pio,node.debounce);
-                        node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
-                        node.cb = PiGPIO.callback(node.pio, PiGPIO.EITHER_EDGE, function(gpio, level, tick) {
-                            node.debug('Received status '+level+" for input "+node.input+" on gpio "+gpio);
-                            node.send({ topic:"nrx800/input/"+node.input, input:parseInt(node.input), payload:revertDigitalInput(level), host:node.host });
-                            node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
-                        });
-                        if (node.read) {
-                            setTimeout(function() {
-                                PiGPIO.read(node.pio, function(err, level) {
-                                    node.send({ topic:"nrx800/input/"+node.input, input:parseInt(node.input), payload:revertDigitalInput(level), host:node.host });
-                                    node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
-                                });
-                            }, 20);
-                        }
-                    }
-                });
-            }
-            run();
-        }
-        else {
-            node.warn(RED._("pi-gpiod:errors.invalidpin")+": "+node.pio);
-        }
-
-        node.on("close", function(done) {
-            if (node.retry) { clearTimeout(node.retry); }
-            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
-            node.cb.cancel();
-            PiGPIO.close();
-            done();
-        });
-    }
-    RED.nodes.registerType("nrx800 input",DigitalInput);
-
-    function DigitalInputs(n) {
-        RED.nodes.createNode(this,n);
-        this.host = n.host || defaultHost;
-        this.port = n.port || defaultPort;
-        this.intype = "PUD_OFF";
-        this.read = n.read || true;
-        this.debounce = Number(n.debounce || 25);
-        var node = this;
-        var PiGPIO;
-
-        PiGPIO = new Pigpio();
-        var inerror = false;
-        var run = function() {
-            PiGPIO.pi(node.host, node.port, function(err) {
-                if (err) {
-                    node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
-                    if (!inerror) { node.error(err); inerror = true; }
-                    node.retry = setTimeout(function() { run(); }, 5000);
-                }
-                else {
-                    inerror = false;
-                    node.cb = [];
-                    for (let input in digitalInputNumberPinMapping){
-                        const pio = digitalInputNumberPinMapping[input]
-                        node.debug("Iterate over input "+input+" on pin "+pio)
-                        PiGPIO.set_mode(pio, PiGPIO.INPUT);
-                        PiGPIO.set_glitch_filter(pio,node.debounce);
-                        var cb = PiGPIO.callback(pio, PiGPIO.EITHER_EDGE, function(gpio, level, tick) {
-                            var input = digitalInputPinMapping[gpio]
-                            node.debug('Received status '+level+" for input "+input+" on gpio "+gpio);
-                            node.send({ topic:"nrx800/input/"+input, input:parseInt(input), payload:revertDigitalInput(level), host:node.host });
-                        });
-                        node.cb.push(cb)
-                        // if (node.read) {
-                        //     setTimeout(function() {
-                        //         PiGPIO.read(pio, function(err, level) {
-                        //             node.send({ topic:"input/"+input, payload:revertDigitalInput(level), host:node.host });
-                        //         });
-                        //     }, 20);
-                        // }
-                    }
-                    node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
-                }
-            });
-        }
-        run();
-
-        node.on("close", function(done) {
-            if (node.retry) { clearTimeout(node.retry); }
-            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
-            node.cb.forEach((element) => element.cancel());
-            PiGPIO.close();
-            done();
-        });
-    }
-    RED.nodes.registerType("nrx800 inputs",DigitalInputs);
 
 }
 

@@ -9,6 +9,8 @@ To enable the service `sudo systemctl enable pigpiod.service`
 ### Installation process
 
 ```console
+nrx800@nrx800:~ $ sudo systemctl enable pigpiod.service
+nrx800@nrx800:~ $ sudo systemctl start pigpiod.service
 nrx800@nrx800:~ $ wget https://github.com/dduransseau/node-red-contrib-gce-nrx-800/archive/refs/heads/main.zip
 nrx800@nrx800:~ $ unzip main.zip
 nrx800@nrx800:~ $ rm main.zip
