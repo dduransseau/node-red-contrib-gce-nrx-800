@@ -12,8 +12,6 @@ To enable the service `sudo systemctl enable pigpiod.service`
 nrx800@nrx800:~ $ wget https://github.com/dduransseau/node-red-contrib-gce-nrx-800/archive/refs/heads/main.zip
 nrx800@nrx800:~ $ unzip main.zip
 nrx800@nrx800:~ $ rm main.zip
-nrx800@nrx800:~ $ cd node-red-contrib-gce-nrx-800-main/
-nrx800@nrx800:~/node-red-contrib-gce-nrx-800-main $ npm install .
 nrx800@nrx800:~/node-red-contrib-gce-nrx-800-main $ cd ~/.node-red
 nrx800@nrx800:~/.node-red $ npm install /home/nrx800/node-red-contrib-gce-nrx-800-main
 ```
