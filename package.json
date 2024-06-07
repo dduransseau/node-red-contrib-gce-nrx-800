@@ -2,9 +2,7 @@
   "name": "@dduransseau/node-red-contrib-gce-nrx-800",
   "version": "0.1.0",
   "description": "Controling GCE electronics NRX-800 relays and digital inputs",
-  "dependencies"  : {
-      "js-pigpio": "*"
-  },
+  "dependencies"  : {},
   "repository": {
     "type": "git",
     "url": "https://github.com/@dduransseau/node-red-contrib-gce-nrx-800.git",
