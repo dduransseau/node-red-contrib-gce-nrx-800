@@ -60,7 +60,10 @@
         icon: "font-awesome/fa-microchip",
         defaults: {
             number: {
-                value: "", required:true
+                value: "", required:true,
+            },
+            debounce: {
+                value: 25
             }
         },
         inputs: 0,
@@ -84,9 +87,9 @@
         defaults: {},
         inputs: 1,
         outputs: 1,
-        paletteLabel: 'User led',
+        paletteLabel: 'Led user',
         label: function () {
-            return 'NRX-800 user led';
+            return 'NRX-800 led user';
         },
     });
 </script>
