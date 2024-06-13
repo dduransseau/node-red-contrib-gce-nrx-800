@@ -1,5 +1,9 @@
 <script type="text/x-red" data-template-name="nrx800 relay">
     <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
+    </div>
+    <div class="form-row">
         <label for="node-input-number" class="l-width">Number</label>
         <select id="node-input-number" style="width:125px">
             <option value="1">1</option>
@@ -16,10 +20,13 @@
 </script>
 <script type='text/javascript'>
     RED.nodes.registerType('nrx800 relay', {
-        category: 'GCE NRX\u2013800',
+        category: 'GCE NRX\u2011800',
         color: '#80c600',
         icon: "font-awesome/fa-microchip",
         defaults: {
+            name: {
+                value: ""
+            },
             number: {
                 value: "msg", required:true
             }
@@ -28,16 +35,23 @@
         outputs: 1,
         paletteLabel: 'Relay',
         label: function () {
-            if (this.number && this.number !== "msg") {
-                return 'NRX-800 Relay '+ this.number;
+            if (this.name){
+                return this.name
             }
-            return 'NRX-800 Relays';
+            else if (this.number && this.number !== "msg") {
+                return 'NRX\u2011800 Relay '+ this.number;
+            }
+            return 'NRX\u2011800 Relays';
         },
     });
 
 </script>
 
 <script type="text/x-red" data-template-name="nrx800 input">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
+    </div>
     <div class="form-row">
         <label for="node-input-number" class="l-width">Number</label>
         <select id="node-input-number" style="width:75px">
@@ -52,13 +66,20 @@
             <option value="all">All</option>
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-debounce"><i class="fa fa-filter"></i> <span data-i18n="node-red:debounce">Anti-rebond</span></label>
+        <input type="text" id="node-input-debounce" style="text-align:end; width:50px !important">
+    </div>
 </script>
 <script type='text/javascript'>
     RED.nodes.registerType('nrx800 input', {
-        category: 'GCE NRX\u2013800',
+        category: 'GCE NRX\u2011800',
         color: '#80c600',
         icon: "font-awesome/fa-microchip",
         defaults: {
+            name: {
+                value: ""
+            },
             number: {
                 value: "", required:true,
             },
@@ -70,26 +91,42 @@
         outputs: 1,
         paletteLabel: 'Digital input',
         label: function () {
-            if (this.number && this.number !== "all") {
-                return 'NRX-800 Input '+ this.number;
+            if (this.name){
+                return this.name
             }
-            return 'NRX-800 Inputs';
+            else if (this.number && this.number !== "all") {
+                return 'NRX\u2011800 Input '+ this.number;
+            }
+            return 'NRX\u2011800 Inputs';
         },
     });
 
 </script>
 
+<script type="text/x-red" data-template-name="nrx800 led-user">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
+    </div>
+</script>
 <script type='text/javascript'>
     RED.nodes.registerType('nrx800 led-user', {
-        category: 'GCE NRX\u2013800',
+        category: 'GCE NRX\u2011800',
         color: '#80c600',
         icon: "font-awesome/fa-microchip",
-        defaults: {},
+        defaults: {
+            name: {
+                value: ""
+            }
+            },
         inputs: 1,
         outputs: 1,
         paletteLabel: 'Led user',
         label: function () {
-            return 'NRX-800 led user';
+            if (this.name){
+                return this.name
+            }
+            return 'NRX\u2011800 led user';
         },
     });
 </script>

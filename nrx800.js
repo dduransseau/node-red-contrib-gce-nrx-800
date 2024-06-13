@@ -66,6 +66,9 @@ module.exports = function(RED) {
         var node = this;
         var PiGPIO;
 
+        const home = env.get("HOME");
+        node.debug("Found home environment data: "+ home)
+
         function inputlistener(msg) {
             // node.log('Received message '+msg.payload+" for relay "+node.relay);
             if (msg.payload === "true") { msg.payload = 1; }
@@ -90,8 +93,10 @@ module.exports = function(RED) {
                 node.debug('Set relay '+ relay + " to "+out+" on pin "+pio);
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 PiGPIO.write(pio, out);
-                node.status({fill:"grey",shape:"ring",text:relayStatusMapping[out]});
                 node.send({ topic:"nrx800/relay/"+relay, relay:parseInt(relay), payload:relayStatusMapping[out], host:node.host });
+                if (node.pio !== undefined) {
+                    node.status({fill:"grey",shape:"ring",text:relayStatusMapping[out]});
+                }
             }
             else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
         }
@@ -157,7 +162,9 @@ module.exports = function(RED) {
                 var input = digitalInputPinMapping[gpio]
                 node.debug('Received status '+level+" for input "+input+" on gpio "+gpio);
                 node.send({ topic:"nrx800/input/"+input, input:parseInt(input), payload:revertDigitalInput(level), host:node.host });
-                node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
+                if (node.pio !== undefined) {
+                    node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
+                }
             }))
         }
 
