@@ -66,13 +66,12 @@ module.exports = function(RED) {
         var node = this;
         var PiGPIO;
 
-        const home = env.get("HOME");
-        node.debug("Found home environment data: "+ home)
-
         function inputlistener(msg) {
             // node.log('Received message '+msg.payload+" for relay "+node.relay);
             if (msg.payload === "true") { msg.payload = 1; }
             if (msg.payload === "false") { msg.payload = 0; }
+            if (msg.payload === "ON") { msg.payload = 1; }
+            if (msg.payload === "OFF") { msg.payload = 0; }
             var out = Number(msg.payload);
             if (out === 0 || out === 1){
                 var pio = node.pio;
@@ -91,6 +90,13 @@ module.exports = function(RED) {
                     }
                 }
                 node.debug('Set relay '+ relay + " to "+out+" on pin "+pio);
+
+                PiGPIO.set_mode(pio, instance.INPUT);
+                PiGPIO.read(pio, function(result) {
+                    node.debug('Read relay '+ relay + " as value "+result);
+                })
+                PiGPIO.set_mode(pio,PiGPIO.OUTPUT);
+
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 PiGPIO.write(pio, out);
                 node.send({ topic:"nrx800/relay/"+relay, relay:parseInt(relay), payload:relayStatusMapping[out], host:node.host });
@@ -157,7 +163,7 @@ module.exports = function(RED) {
 
         function setupDigitalInputGpio(instance, pin){
             instance.set_mode(pin,instance.INPUT);
-            instance.set_glitch_filter(pin,node.debounce);
+            instance.set_glitch_filter(pin, node.debounce);
             node.callbacks.push(PiGPIO.callback(pin, instance.EITHER_EDGE, function (gpio, level, tick) {
                 var input = digitalInputPinMapping[gpio]
                 node.debug('Received status '+level+" for input "+input+" on gpio "+gpio);
@@ -274,8 +280,4 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("nrx800 led-user", LedUser);
-
-
 }
-
-
