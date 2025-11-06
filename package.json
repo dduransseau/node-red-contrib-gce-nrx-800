@@ -8,7 +8,7 @@
     }
   },
   "dependencies": {
-    "opengpio": "opengpio"
+    "opengpio": "file:./opengpio"
   },
   "keywords": ["node-red", "gpio", "GCE"]
 }
