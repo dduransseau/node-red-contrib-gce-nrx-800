@@ -1,21 +1,14 @@
 {
-  "name": "@dduransseau/node-red-contrib-gce-nrx-800",
-  "version": "0.1.0",
-  "description": "Controling GCE electronics NRX-800 relays and digital inputs",
-  "dependencies"  : {},
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/@dduransseau/node-red-contrib-gce-nrx-800.git",
-    "directory" : "/"
-  },
-  "author": {
-      "name": "Damien Duransseau",
-      "email": "damien@duransseau.net"
-  },
-  "license": "Apache-2.0",
-  "node-red"     : {
-        "nodes": {
-            "nrx800-relay": "./nrx800.js"
-        }
+  "name": "node-red-contrib-opengpio",
+  "version": "0.2.0",
+  "description": "Manage GCE NRX-800 device",
+  "node-red": {
+    "nodes": {
+      "gpio-input": "nrx800.js"
     }
+  },
+  "dependencies": {
+    "opengpio": "opengpio"
+  },
+  "keywords": ["node-red", "gpio", "GCE"]
 }
