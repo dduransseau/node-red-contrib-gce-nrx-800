@@ -1,14 +1,14 @@
 {
-  "name": "@dduransseau/node-red-contrib-gce-nrx",
-  "version": "0.2.1",
+  "name": "@dduransseau/node-red-contrib-gce-nrx800",
+  "version": "0.2.2",
   "description": "Manage GCE NRX-800 device",
   "node-red": {
     "nodes": {
-      "gpio-input": "nrx800.js"
+      "nrx800": "nrx800.js"
     }
   },
   "dependencies": {
-    "opengpio": "file:./opengpio"
+    "opengpio": "^2.0.2"
   },
   "keywords": ["node-red", "gpio", "GCE"]
 }

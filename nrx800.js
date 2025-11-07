@@ -25,27 +25,22 @@ module.exports = function(RED) {
     }
 	
 	const digitalInputStatusMapping = {
-        0: "RISING",
-        1: "FALLING"
+        true: "Rising",
+        false: "Falling"
     }
 
     const relayStatusMapping = {
-        0: "OPEN",
-        1: "CLOSED"
+        true: "Closed",
+		false: "Open"
     }
 
     const ledStatusMapping = {
-        0: "ON",
-        1: "OFF"
+        true: "On",
+        false: "Off"
     }
 	
 	function revertDigitalInput(l){
-        const level = Number(l)
-        if (level === 0){
-            return 1
-        } else {
-            return 0
-        }
+		return l ? false : true
     }
 	
   function DigitalInputNode(config) {
@@ -60,7 +55,7 @@ module.exports = function(RED) {
     try {
 		node.watcher = Default.watch({ chip: 0, line: node.pin }, Edge.Both);
 		node.watcher.on('change', (value) => {
-			input = value ? 0 : 1;
+			input = revertDigitalInput(value);
 			// Debounce
 			const now = performance.now();
 			// console.log(now, now - lastEventTime, config.debounce, value, input);
@@ -118,9 +113,10 @@ module.exports = function(RED) {
 		node.pendingValue = null;
 		
 		function inputlistener(msg) {
-			var out = Number(msg.payload);
-			if (out === 0 || out === 1){
+			const out = msg.payload ? true: false;
+			if (out === true || out === false){
 				if (node.pin){
+					// Actionning relay by setting the value of the relay
 					node.relay.value = out;
 					node.send({ relay:node.relayNumber, status:relayStatusMapping[out], pin: node.pin, payload: out});
 					node.status({fill:"grey",shape:"dot",text:relayStatusMapping[out]});
@@ -153,7 +149,6 @@ module.exports = function(RED) {
 			}
 			else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
 		}
-		// console.log("Setup relay ", node.relayNumber, "for GPIO", node.pin);
 		if (this.pin !== undefined) {
 			node.relay = Default.output({ chip: 0, line: node.pin });
 		} else if (node.number == "msg") {
@@ -176,21 +171,16 @@ module.exports = function(RED) {
         var node = this;
 
         function inputlistener(msg) {
-            // node.log('Received message '+msg.payload+" for relay "+node.relay);
-            if (msg.payload === "true")
-				msg.payload = 1; 
-            else if (msg.payload === "false")
-				msg.payload = 0; 
-            else if (msg.payload === "ON")
-				msg.payload = 1;
-            else if (msg.payload === "OFF")
-				msg.payload = 0;
-            var out = Number(msg.payload);
-            if (out === 0 || out === 1){
-                out = revertDigitalInput(out);
-				node.led.value = out;
+            if (msg.payload === "On")
+				msg.payload = true;
+            else if (msg.payload === "Off")
+				msg.payload = false;
+            const out = msg.payload ? true : false;
+			if (out === true || out === false){
+				// revert value since led logic is inverted
+				node.led.value = revertDigitalInput(out);
                 node.debug("Set user led to "+ledStatusMapping[out]);
-                node.status({fill:out ? 'grey' : 'green', shape:"dot", text:ledStatusMapping[out]});
+                node.status({fill:out ? 'green' : 'grey', shape:"dot", text:ledStatusMapping[out]});
                 node.send({ status:ledStatusMapping[out], payload: out});
             }
             else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false,ON,OFF)") }

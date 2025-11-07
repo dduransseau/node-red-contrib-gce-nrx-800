@@ -1,10 +1,10 @@
 <script type="text/x-red" data-template-name="nrx800-digital-input">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name">Name</span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-number" class="l-width"><span data-i18n="node-red:common.label.number"></span></label>
+        <label for="node-input-number" class="l-width"><span data-i18n="nrx800.common.number">Number</span></label>
         <select id="node-input-number" style="width:75px">
             <option value="1">1</option>
             <option value="2">2</option>
@@ -17,8 +17,8 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-debounce"><i class="fa fa-filter"></i> <span data-i18n="node-red:debounce">Anti-rebond</span></label>
-        <input type="number" id="node-input-debounce" style="text-align:end; width:50px !important">
+        <label for="node-input-debounce"><i class="fa fa-filter"></i> <span data-i18n="nrx800.input.debounce">Debounce (ms)</span></label>
+        <input type="number" id="node-input-debounce" style="text-align:end; width:75px !important">
     </div>
 </script>
 <script type='text/javascript'>
@@ -28,7 +28,7 @@
         icon: "font-awesome/fa-microchip",
         defaults: {
             name: { value: "" },
-            number: { value: "", required:true,},
+            number: { value: "", required:true},
             debounce: { value: 50 }
         },
         inputs: 0,
@@ -41,7 +41,7 @@
             else if (this.number && this.number !== "all") {
                 return 'NRX\u2011800 Input '+ this.number;
             }
-            return 'NRX\u2011800 Inputs';
+            return 'NRX\u2011800 Input';
         },
     });
 
@@ -51,13 +51,13 @@
   <h3>Digital input</h3>
   <dl class="message-properties">
     <dt>payload <span class="property-type">number</span></dt>
-    <dd>0 or 1 representing the digital input state</dd>
+    <dd>true or false representing the digital input state</dd>
     <dt>pin <span class="property-type">number</span></dt>
     <dd>GPIO pin number</dd>
 	<dt>input <span class="property-type">number</span></dt>
     <dd>digital input number</dd>
 	<dt>status <span class="property-type">text</span></dt>
-    <dd>RISING or FALLING representing the GPIO state</dd>
+    <dd>Rising or Falling representing the GPIO state</dd>
   </dl>
 </script>
 
@@ -68,7 +68,7 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-number" class="l-width"><span data-i18n="node-red:common.label.number"></span></label>
+        <label for="node-input-number" class="l-width"><span data-i18n="nrx800.number">Number</span></label>
         <select id="node-input-number" style="width:125px">
             <option value="1">1</option>
             <option value="2">2</option>
@@ -83,7 +83,7 @@
     </div>
 </script>
 <script type='text/javascript'>
-    RED.nodes.registerType('nrxv3 relay', {
+    RED.nodes.registerType('nrx800-relay', {
         category: 'GCE NRX\u2011800',
         color: '#80c600',
         icon: "font-awesome/fa-microchip",
@@ -92,7 +92,7 @@
                 value: ""
             },
             number: {
-                value: "msg", required:true
+                value: "", required:true
             }
         },
         inputs: 1,
@@ -105,10 +105,9 @@
             else if (this.number && this.number !== "msg") {
                 return 'NRX\u2011800 Relay '+ this.number;
             }
-            return 'NRX\u2011800 Relays';
+            return 'NRX\u2011800 Relay';
         },
     });
-
 </script>
 <script type="text/html" data-help-name="nrx800-relay">
   <p>NRX\u2011800 digital input</p>
@@ -121,7 +120,7 @@
 	<dt>relay <span class="property-type">number</span></dt>
     <dd>relay number</dd>
 	<dt>status <span class="property-type">number</span></dt>
-    <dd>0 or 1 representing the relay state</dd>
+    <dd>true or false representing the relay state</dd>
   </dl>
 </script>
 
@@ -153,13 +152,13 @@
         },
     });
 </script>
-<script type="text/html" data-help-name="nrxv3 led-user">
+<script type="text/html" data-help-name="nrx800-led-user">
   <p>NRX\u2011800 user led</p>
   <h3>User led</h3>
   <dl class="message-properties">
     <dt>payload <span class="property-type">number</span></dt>
-    <dd>0 or 1 representing the user led state</dd>
+    <dd>true or false representing the user led state</dd>
 	<dt>status <span class="property-type">text</span></dt>
-    <dd>ON or OFF representing the user led state</dd>
+    <dd>On or Off representing the user led state</dd>
   </dl>
 </script>

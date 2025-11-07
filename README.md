@@ -1,7 +1,9 @@
 node-red-contrib-gce-nrx-800
 ======================
 
-An <a href="http://nodered.org" target="_new">Node-RED</a> nodes to interact with GCE electronics NRX-800 trough libgpio2
+An <a href="http://nodered.org" target="_new">Node-RED</a> nodes to interact with GCE electronics NRX-800 trough libgpiod v2
+
+Based on the amazing project <a href="https://github.com/ExpeditionExploration/opengpio">opengpio</a>
 
 ### Installation process
 

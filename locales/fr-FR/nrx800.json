@@ -1,0 +1,26 @@
+{
+    "nrx800": {
+        "input": {
+            "label": "Entrée numérique",
+            "debounce": "Anti-rebond (ms)"
+        },
+        "relay": {
+                "label": "Relai",
+                "status": {
+                    "Closed": "Fermé",
+                    "Open": "Ouvert"
+                }
+        },
+        "led": {
+                "label": "LED",
+                "status": {
+                    "On": "Allumé",
+                    "Off": "Éteint"
+                }
+        },
+        "common": {
+            "number": "Numéro",
+            "pin": "Broche"
+        }
+    }
+}
