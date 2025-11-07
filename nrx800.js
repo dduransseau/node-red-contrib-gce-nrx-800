@@ -1,283 +1,199 @@
+const { Default, Edge } = require('opengpio');
 
 module.exports = function(RED) {
-    "use strict";
-    var Pigpio = require('js-pigpio');
-
-    const defaultHost = "::1";
-    const defaultPort = 8888;
-
-    function revertDigitalInput(l){
-        const level = Number(l)
-        if (level === 0){
-            return 1
-        } else {
-            return 0
-        }
-    }
-
-    function objectFlip(obj) {
-        const ret = {};
-        Object.keys(obj).forEach(key => {
-          ret[obj[key]] = key;
-        });
-        return ret;
-      }
-
+	
     const relayNumberPinMapping = {
-        "1": "4",
-        "2": "5",
-        "3": "6",
-        "4": "12",
-        "5": "13",
-        "6": "16",
-        "7": "17",
-        "8": "18"
+        "1": 4,
+        "2": 5,
+        "3": 6,
+        "4": 12,
+        "5": 13,
+        "6": 16,
+        "7": 17,
+        "8": 18
     }
 
     const digitalInputNumberPinMapping = {
-        "1": "20",
-        "2": "21",
-        "3": "22",
-        "4": "23",
-        "5": "24",
-        "6": "25",
-        "7": "26",
-        "8": "27"
+        "1": 20,
+        "2": 21,
+        "3": 22,
+        "4": 23,
+        "5": 24,
+        "6": 25,
+        "7": 26,
+        "8": 27
+    }
+	
+	const digitalInputStatusMapping = {
+        true: "Rising",
+        false: "Falling"
     }
 
-    const digitalInputPinMapping = objectFlip(digitalInputNumberPinMapping)
-
     const relayStatusMapping = {
-        0: "OPEN",
-        1: "CLOSED"
+        true: "Closed",
+		false: "Open"
     }
 
     const ledStatusMapping = {
-        0: "ON",
-        1: "OFF"
+        true: "On",
+        false: "Off"
     }
-
-    function Relay(n) {
-        RED.nodes.createNode(this,n);
-        this.host = n.host || defaultHost;
-        this.port = n.port || defaultPort;
-        this.relay = n.number;
-        this.pio = relayNumberPinMapping[n.number];
-        var node = this;
-        var PiGPIO;
-
-        function inputlistener(msg) {
-            // node.log('Received message '+msg.payload+" for relay "+node.relay);
-            if (msg.payload === "true") { msg.payload = 1; }
-            if (msg.payload === "false") { msg.payload = 0; }
-            if (msg.payload === "ON") { msg.payload = 1; }
-            if (msg.payload === "OFF") { msg.payload = 0; }
-            var out = Number(msg.payload);
-            if (out === 0 || out === 1){
-                var pio = node.pio;
-                var relay = node.relay;
-
-                // Confirm that node is configured to listen on multiple relay to avoid chaotic behavior
-                if (msg.relay !== undefined && node.relay === "msg"){
-                    var relayNumber = parseInt(msg.relay)
-                    if (0 < relayNumber < 9){
-                        node.debug("Received message for relay "+ relayNumber)
-                        relay = msg.relay
-                        pio = relayNumberPinMapping[msg.relay]
-                    } else {
-                        node.warn("Received invalid relay number "+relayNumber);
-                        return
-                    }
-                }
-                node.debug('Set relay '+ relay + " to "+out+" on pin "+pio);
-
-                PiGPIO.set_mode(pio, instance.INPUT);
-                PiGPIO.read(pio, function(result) {
-                    node.debug('Read relay '+ relay + " as value "+result);
-                })
-                PiGPIO.set_mode(pio,PiGPIO.OUTPUT);
-
-                if (RED.settings.verbose) { node.log("out: "+msg.payload); }
-                PiGPIO.write(pio, out);
-                node.send({ topic:"nrx800/relay/"+relay, relay:parseInt(relay), payload:relayStatusMapping[out], host:node.host });
-                if (node.pio !== undefined) {
-                    node.status({fill:"grey",shape:"ring",text:relayStatusMapping[out]});
-                }
-            }
-            else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
-        }
-
-        if (node.relay !== undefined) {
-            PiGPIO = new Pigpio();
-            var inerror = false;
-            var run = function() {
-                PiGPIO.pi(node.host, node.port, function(err) {
-                    if (err) {
-                        node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
-                        if (!inerror) { node.error(err,err); inerror = true; }
-                        node.retry = setTimeout(function() { run(); }, 5000);
-                    }
-                    else {
-                        inerror = false;
-                        if (node.relay === "msg") {
-                            // Set all relay pin as output since selection will be set on msg
-                            for (let relayNumber in relayNumberPinMapping){
-                                PiGPIO.set_mode(relayNumberPinMapping[relayNumber], PiGPIO.OUTPUT);
-                            }
-                        } else {
-                            node.debug("Setup relay "+ node.relay+" on pin "+node.pio)
-                            PiGPIO.set_mode(node.pio,PiGPIO.OUTPUT);
-                        }
-                        node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
-                    }
-                });
-            }
-            run();
-            node.on("input", inputlistener);
-        }
-        else {
-            node.warn(RED._("pi-gpiod:errors.invalidpin")+": "+node.pio);
-        }
-
-        node.on("close", function(done) {
-            if (node.retry) { clearTimeout(node.retry); }
-            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
-            PiGPIO.close();
-            done();
-        });
+	
+	function revertDigitalInput(l){
+		return l ? false : true
     }
-    RED.nodes.registerType("nrx800 relay",Relay);
-
-    function DigitalInput(n) {
-        RED.nodes.createNode(this,n);
-        this.host = n.host || defaultHost;
-        this.port = n.port || defaultPort;
-        this.input = n.number;
-        this.pio = digitalInputNumberPinMapping[n.number];
-        this.intype = "PUD_OFF";
-        this.read = n.read || true;
-        this.debounce = Number(n.debounce || 25);
-        var node = this;
-        node.callbacks = [];
-        var PiGPIO;
-
-        function setupDigitalInputGpio(instance, pin){
-            instance.set_mode(pin,instance.INPUT);
-            instance.set_glitch_filter(pin, node.debounce);
-            node.callbacks.push(PiGPIO.callback(pin, instance.EITHER_EDGE, function (gpio, level, tick) {
-                var input = digitalInputPinMapping[gpio]
-                node.debug('Received status '+level+" for input "+input+" on gpio "+gpio);
-                node.send({ topic:"nrx800/input/"+input, input:parseInt(input), payload:revertDigitalInput(level), host:node.host });
-                if (node.pio !== undefined) {
-                    node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
-                }
-            }))
-        }
-
-        if (node.input !== undefined) {
-            PiGPIO = new Pigpio();
-            var inerror = false;
-            var run = function() {
-                PiGPIO.pi(node.host, node.port, function(err) {
-                    if (err) {
-                        node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
-                        if (!inerror) { node.error(err); inerror = true; }
-                        node.retry = setTimeout(function() { run(); }, 5000);
-                    }
-                    else {
-                        inerror = false;
-                        // Set specific digital input
-                        if (node.pio !== undefined) {
-                            setupDigitalInputGpio(PiGPIO, node.pio)
-                            // Read status of input on deploy
-                            if (node.read) {
-                                setTimeout(function() {
-                                    PiGPIO.read(node.pio, function(err, level) {
-                                        node.send({ topic:"nrx800/input/"+node.input, input:parseInt(node.input), payload:revertDigitalInput(level), host:node.host });
-                                        node.status({fill:"grey",shape:"dot",text:revertDigitalInput(level)});
-                                    });
-                                }, 20);
-                            }
-                        } // Set all digital input
-                        else {
-                            for (let input in digitalInputNumberPinMapping){
-                                const pio = digitalInputNumberPinMapping[input]
-                                node.debug("Iterate over input "+input+" on pin "+pio)
-                                setupDigitalInputGpio(PiGPIO, pio)
-                            }
-                        }
-                        node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
-                    }
-                });
-            }
-            run();
-        }
-        else {
-            node.warn(RED._("pi-gpiod:errors.invalidpin")+": "+node.pio);
-        }
-
-        node.on("close", function(done) {
-            if (node.retry) { clearTimeout(node.retry); }
-            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
-            node.callbacks.forEach((element) => element.cancel());
-            PiGPIO.close();
-            done();
-        });
+	
+  function DigitalInputNode(config) {
+    RED.nodes.createNode(this, config);
+    const node = this;
+	this.inputNumber = parseInt(config.number);
+	this.pin = digitalInputNumberPinMapping[config.number];
+	let input;
+	let lastEventTime = performance.now();
+    let lastValue = null;
+    
+    try {
+		node.watcher = Default.watch({ chip: 0, line: node.pin }, Edge.Both);
+		node.watcher.on('change', (value) => {
+			input = revertDigitalInput(value);
+			// Debounce
+			const now = performance.now();
+			// console.log(now, now - lastEventTime, config.debounce, value, input);
+			if (now - lastEventTime < config.debounce){
+				return
+			}
+			lastEventTime = now;
+			
+			node.send({
+			  status: digitalInputStatusMapping[input],
+			  pin: node.pin,
+			  input: node.inputNumber,
+			  payload: input
+			});
+			// Mettre à jour le statut visuel
+			node.status({
+			  fill: input ? 'green' : 'grey',
+			  shape: 'dot'
+			});
+		});
+		// Initial read
+		input = node.watcher.value ? false : true;
+		node.status({
+		  fill: input ? 'green' : 'grey',
+		  shape: 'dot'
+		}); 
+    } catch(err) {
+      node.error('GPIO init error: ' + err.message);
+      node.status({fill: 'red', shape: 'ring', text: 'Error'});
     }
-    RED.nodes.registerType("nrx800 input",DigitalInput);
-
+    
+    node.on('close', function(done) {
+		node.watcher.stop();
+		if (node.watcher) {
+		node.watcher.unexport()
+		  .then(() => done())
+		  .catch(err => {
+			node.error('Cleanup error: ' + err.message);
+			done();
+		  });
+		} else {
+			done();
+		}
+    });
+  }
+  RED.nodes.registerType("nrx800-digital-input", DigitalInputNode);
+  
+  function RelayNode(n) {
+		RED.nodes.createNode(this,n);
+        this.relayNumber = parseInt(n.number);
+        this.pin = relayNumberPinMapping[n.number];
+		var node = this;
+		
+		node.gpioReady = false;
+		node.pendingValue = null;
+		
+		function inputlistener(msg) {
+			const out = msg.payload ? true: false;
+			if (out === true || out === false){
+				if (node.pin){
+					// Actionning relay by setting the value of the relay
+					node.relay.value = out;
+					node.send({ relay:node.relayNumber, status:relayStatusMapping[out], pin: node.pin, payload: out});
+					node.status({fill:"grey",shape:"dot",text:relayStatusMapping[out]});
+				}
+				// Confirm that node is configured to listen on multiple relay to avoid chaotic behavior
+				// else if (msg.relay !== undefined && node.relayNumber === "msg"){
+					// var relayNumber = parseInt(msg.relay)
+					// if (0 < relayNumber < 9){
+						// node.debug("Received message for relay "+ relayNumber)
+						// node.relay = Default.output({ chip: 0, line: relayNumber });
+						// setImmediate(() => {
+							// node.ready = true;
+							// if (node.pendingValue !== null) {
+							  // try {
+								// node.relay.value = node.pendingValue;
+								// node.updateStatus(node.pendingValue);
+								// node.pendingValue = null;
+							  // } catch(err) {
+								// node.error('Failed to set pending value: ' + err.message);
+							  // }
+							// }
+						  // });
+					// } else {
+						// node.warn("Received invalid relay number "+relayNumber);
+						// return
+					// }
+				// }
+				// console.log('Set relay '+ node.relayNumber + " to "+out+" on pin "+node.pin, node.id);
+				if (RED.settings.verbose) { node.log("out: "+msg.payload); }
+			}
+			else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
+		}
+		if (this.pin !== undefined) {
+			node.relay = Default.output({ chip: 0, line: node.pin });
+		} else if (node.number == "msg") {
+			console.log("Setup relay defined at message level");
+		} else {
+            this.warn(RED._("pi-gpiod:errors.invalidpin")+": "+this.pio);
+        }
+		this.on("input", inputlistener);
+		this.on('close', (done) => {
+		  node.relay.stop();
+		  done();
+		});
+	}
+    RED.nodes.registerType("nrx800-relay",RelayNode);
+  
+  
     function LedUser(n) {
         RED.nodes.createNode(this,n);
-        this.host = n.host || defaultHost;
-        this.port = n.port || defaultPort;
         this.pio = 19;
         var node = this;
-        var PiGPIO;
 
         function inputlistener(msg) {
-            // node.log('Received message '+msg.payload+" for relay "+node.relay);
-            if (msg.payload === "true") { msg.payload = 1; }
-            if (msg.payload === "false") { msg.payload = 0; }
-            if (msg.payload === "ON") { msg.payload = 1; }
-            if (msg.payload === "OFF") { msg.payload = 0; }
-            var out = Number(msg.payload);
-            if (out === 0 || out === 1){
-                out = revertDigitalInput(out);
+            if (msg.payload === "On")
+				msg.payload = true;
+            else if (msg.payload === "Off")
+				msg.payload = false;
+            const out = msg.payload ? true : false;
+			if (out === true || out === false){
+				// revert value since led logic is inverted
+				node.led.value = revertDigitalInput(out);
                 node.debug("Set user led to "+ledStatusMapping[out]);
-                if (RED.settings.verbose) { node.log("out: "+msg.payload); }
-                PiGPIO.write(node.pio, out);
-                node.status({fill:"grey",shape:"ring",text:ledStatusMapping[out]});
-                node.send({ topic:"nrx800/led/user", payload:ledStatusMapping[out], host:node.host });
+                node.status({fill:out ? 'green' : 'grey', shape:"dot", text:ledStatusMapping[out]});
+                node.send({ status:ledStatusMapping[out], payload: out});
             }
             else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false,ON,OFF)") }
         }
 
-        PiGPIO = new Pigpio();
-        var inerror = false;
-        var run = function() {
-            PiGPIO.pi(node.host, node.port, function(err) {
-                if (err) {
-                    node.status({fill:"red",shape:"ring",text:err.code+" "+node.host+":"+node.port});
-                    if (!inerror) { node.error(err,err); inerror = true; }
-                    node.retry = setTimeout(function() { run(); }, 5000);
-                }
-                else {
-                    inerror = false;
-                    node.debug("Setup user led")
-                    PiGPIO.set_mode(node.pio, PiGPIO.OUTPUT);
-                    node.status({fill:"green",shape:"dot",text:"node-red:common.status.ok"});
-                }
-            });
-        }
-        run();
+        node.led = Default.output({ chip: 0, line: node.pio });
+		node.led.value = true;
         node.on("input", inputlistener);
 
         node.on("close", function(done) {
-            if (node.retry) { clearTimeout(node.retry); }
-            node.status({fill:"grey",shape:"ring",text:"pi-gpiod.status.closed"});
-            PiGPIO.close();
+            node.led.stop();
             done();
         });
     }
-    RED.nodes.registerType("nrx800 led-user", LedUser);
-}
+    RED.nodes.registerType("nrx800-led-user", LedUser);
+};
