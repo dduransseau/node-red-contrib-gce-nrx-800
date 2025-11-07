@@ -8,11 +8,11 @@ Based on the amazing project <a href="https://github.com/ExpeditionExploration/o
 ### Installation process
 
 ```console
-nrx800@nrx800:~ $ wget https://github.com/dduransseau/node-red-contrib-gce-nrx-800/archive/refs/heads/libgpiod.zip
-nrx800@nrx800:~ $ unzip libgpiod.zip
-nrx800@nrx800:~ $ rm libgpiod.zip
-nrx800@nrx800:~ $ cd node-red-contrib-gce-nrx-800-libgpiod
+nrx800@nrx800:~ $ wget https://github.com/dduransseau/node-red-contrib-gce-nrx-800/archive/refs/heads/main.zip
+nrx800@nrx800:~ $ unzip main.zip
+nrx800@nrx800:~ $ rm main.zip
+nrx800@nrx800:~ $ cd node-red-contrib-gce-nrx-800-main
 nrx800@nrx800:~ $ npm install ./
 nrx800@nrx800:~ $ cd ~/.node-red
-nrx800@nrx800:~/.node-red $ npm install /home/nrx800/node-red-contrib-gce-nrx-800-libgpiod
+nrx800@nrx800:~/.node-red $ npm install /home/nrx800/node-red-contrib-gce-nrx-800-main
 ```
