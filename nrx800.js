@@ -25,18 +25,18 @@ module.exports = function(RED) {
     }
 	
 	const digitalInputStatusMapping = {
-        true: "Rising",
-        false: "Falling"
+        true: "rising",
+        false: "falling"
     }
 
     const relayStatusMapping = {
-        true: "Closed",
-		false: "Open"
+        true: "closed",
+		false: "cpen"
     }
 
     const ledStatusMapping = {
-        true: "On",
-        false: "Off"
+        true: "on",
+        false: "off"
     }
 	
 	function revertDigitalInput(l){

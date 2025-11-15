@@ -1,0 +1,40 @@
+<script type="text/html" data-help-name="nrx800-digital-input">
+  <p>NRX-800 entrée numérique</p>
+  <h3>Entrée numérique</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">number</span></dt>
+    <dd>true ou false représente l'état de l'entrée numérique</dd>
+    <dt>pin <span class="property-type">number</span></dt>
+    <dd>numéro de la broche GPIO</dd>
+	<dt>input <span class="property-type">number</span></dt>
+    <dd>numéro de l'entrée numérique</dd>
+	<dt>status <span class="property-type">text</span></dt>
+    <dd>Rising ou Falling indique le changement d'état de l'entrée numérique</dd>
+  </dl>
+</script>
+
+<script type="text/html" data-help-name="nrx800-relay">
+  <p>NRX-800 relai</p>
+  <h3>Relai</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">text</span></dt>
+    <dd>true ou false indique l'état du relai. true = fermé et false = ouvert</dd>
+    <dt>pin <span class="property-type">number</span></dt>
+    <dd>numéro de la broche GPIO</dd>
+	<dt>relay <span class="property-type">number</span></dt>
+    <dd>numéro de relai</dd>
+	<dt>status <span class="property-type">text</span></dt>
+    <dd>"closed" ou "open" indique l'état du relai</dd>
+  </dl>
+</script>
+
+<script type="text/html" data-help-name="nrx800-led-user">
+  <p>NRX-800 user led</p>
+  <h3>DEL User</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">number</span></dt>
+    <dd>true or false indique l'état de la DEL. true = allumée, false = éteinte</dd>
+	<dt>status <span class="property-type">text</span></dt>
+    <dd>"on" ou "off" indique l'état de la DEL</dd>
+  </dl>
+</script>
