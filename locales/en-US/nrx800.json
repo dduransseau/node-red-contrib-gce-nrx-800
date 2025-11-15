@@ -1,0 +1,26 @@
+{
+    "nrx800": {
+        "input": {
+            "label": "input",
+			"verbose_label": "Digital input",
+            "debounce": "Debounce (ms)"
+        },
+        "relay": {
+            "label": "relay"
+        },
+        "led": {
+            "label": "led"
+        },
+        "common": {
+            "number": "Number",
+            "pin": "Pin"
+        },
+		"status": {
+			"closed": "Closed",
+            "open": "Open",
+			"on": "On",
+            "off": "Off",
+			"error": "Error"
+		}
+    }
+}

@@ -55,7 +55,7 @@ module.exports = function(RED) {
     try {
 		node.watcher = Default.watch({ chip: 0, line: node.pin }, Edge.Both);
 		node.watcher.on('change', (value) => {
-			input = revertDigitalInput(value);
+			input = value ? false : true;
 			// Debounce
 			const now = performance.now();
 			// console.log(now, now - lastEventTime, config.debounce, value, input);
@@ -119,7 +119,7 @@ module.exports = function(RED) {
 					// Actionning relay by setting the value of the relay
 					node.relay.value = out;
 					node.send({ relay:node.relayNumber, status:relayStatusMapping[out], pin: node.pin, payload: out});
-					node.status({fill:"grey",shape:"dot",text:relayStatusMapping[out]});
+					node.status({fill:"grey",shape:"dot",text: out ? "nrx800.status.closed" : "nrx800.status.open"});
 				}
 				// Confirm that node is configured to listen on multiple relay to avoid chaotic behavior
 				// else if (msg.relay !== undefined && node.relayNumber === "msg"){
@@ -149,6 +149,7 @@ module.exports = function(RED) {
 			}
 			else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
 		}
+		// console.log("Setup relay ", node.relayNumber, "for GPIO", node.pin);
 		if (this.pin !== undefined) {
 			node.relay = Default.output({ chip: 0, line: node.pin });
 		} else if (node.number == "msg") {
@@ -180,7 +181,7 @@ module.exports = function(RED) {
 				// revert value since led logic is inverted
 				node.led.value = revertDigitalInput(out);
                 node.debug("Set user led to "+ledStatusMapping[out]);
-                node.status({fill:out ? 'green' : 'grey', shape:"dot", text:ledStatusMapping[out]});
+                node.status({fill:out ? 'green' : 'grey', shape:"dot", text:out ? "nrx800.status.on" : "nrx800.status.off"});
                 node.send({ status:ledStatusMapping[out], payload: out});
             }
             else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false,ON,OFF)") }

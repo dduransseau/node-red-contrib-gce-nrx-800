@@ -4,8 +4,8 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-number" class="l-width"><span data-i18n="nrx800.common.number">Number</span></label>
-        <select id="node-input-number" style="width:75px">
+        <label class="l-width"><span data-i18n="nrx800.common.number">Number</span></label>
+        <select style="width:75px">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -39,9 +39,9 @@
                 return this.name
             }
             else if (this.number && this.number !== "all") {
-                return 'NRX\u2011800 Input '+ this.number;
+                return 'NRX\u2011800 ' + this._("nrx800.input.label") + " " + this.number
             }
-            return 'NRX\u2011800 Input';
+            return 'NRX\u2011800 '+this._("nrx800.input.label");
         },
     });
 
@@ -64,12 +64,12 @@
 
 <script type="text/x-red" data-template-name="nrx800-relay">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
+        <label for="node-relay-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-relay-name" data-i18n="[placeholder]node-red:common.label.name" autocomplete="off" dir="" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-number" class="l-width"><span data-i18n="nrx800.number">Number</span></label>
-        <select id="node-input-number" style="width:125px">
+        <label class="l-width"><span data-i18n="nrx800.common.number">Number</span></label>
+        <select style="width:125px">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -103,9 +103,9 @@
                 return this.name
             }
             else if (this.number && this.number !== "msg") {
-                return 'NRX\u2011800 Relay '+ this.number;
+                return 'NRX\u2011800 ' + this._("nrx800.relay.label") + " " + this.number;
             }
-            return 'NRX\u2011800 Relay';
+            return 'NRX\u2011800 '+this._("nrx800.relay.label");
         },
     });
 </script>
@@ -148,7 +148,7 @@
             if (this.name){
                 return this.name
             }
-            return 'NRX\u2011800 led user';
+            return 'NRX\u2011800 '+this._("nrx800.led.label")+' user';
         },
     });
 </script>
