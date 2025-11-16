@@ -4,7 +4,7 @@
   "description": "Manage GCE NRX-800 device",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dduransseau/node-red-contrib-gce-nrx-800.git"
+    "url": "git+https://github.com/dduransseau/node-red-contrib-gce-nrx-800.git"
   },
   "author": "Damien Duransseau",
   "node-red": {
@@ -15,5 +15,11 @@
   "dependencies": {
     "opengpio": "^2.0.2"
   },
-  "keywords": ["node-red", "gpio", "libgpiod", "nrx-800", "GCE"]
+  "keywords": [
+    "node-red",
+    "gpio",
+    "libgpiod",
+    "nrx-800",
+    "GCE"
+  ]
 }
