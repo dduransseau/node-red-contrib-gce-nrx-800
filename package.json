@@ -1,6 +1,6 @@
 {
   "name": "@dduransseau/node-red-contrib-gce-nrx800",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Manage GCE NRX-800 device",
   "repository": {
     "type": "git",
