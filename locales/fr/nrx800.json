@@ -9,7 +9,7 @@
             "label": "relai"
         },
         "led": {
-            "label": "del"
+            "label": "led"
         },
         "common": {
             "number": "Numéro",

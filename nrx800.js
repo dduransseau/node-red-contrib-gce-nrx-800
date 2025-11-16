@@ -31,7 +31,7 @@ module.exports = function(RED) {
 
     const relayStatusMapping = {
         true: "closed",
-		false: "cpen"
+		false: "open"
     }
 
     const ledStatusMapping = {
@@ -172,9 +172,9 @@ module.exports = function(RED) {
         var node = this;
 
         function inputlistener(msg) {
-            if (msg.payload === "On")
+            if (msg.payload === "on")
 				msg.payload = true;
-            else if (msg.payload === "Off")
+            else if (msg.payload === "off")
 				msg.payload = false;
             const out = msg.payload ? true : false;
 			if (out === true || out === false){
@@ -184,7 +184,7 @@ module.exports = function(RED) {
                 node.status({fill:out ? 'green' : 'grey', shape:"dot", text:out ? "nrx800.status.on" : "nrx800.status.off"});
                 node.send({ status:ledStatusMapping[out], payload: out});
             }
-            else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false,ON,OFF)") }
+            else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false,on,off)") }
         }
 
         node.led = Default.output({ chip: 0, line: node.pio });
