@@ -1,6 +1,6 @@
 <script type="text/html" data-help-name="nrx800-digital-input">
-  <p>NRX\u2011800 digital input</p>
-  <h3>Digital input</h3>
+  <p>NRX-800 digital input</p>
+  <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>payload <span class="property-type">number</span></dt>
     <dd>true or false representing the digital input state</dd>
@@ -8,16 +8,23 @@
     <dd>GPIO pin number</dd>
 	<dt>input <span class="property-type">number</span></dt>
     <dd>digital input number</dd>
-	<dt>status <span class="property-type">text</span></dt>
+	<dt>status <span class="property-type">string</span></dt>
     <dd>Rising or Falling representing the GPIO state</dd>
   </dl>
 </script>
 
 <script type="text/html" data-help-name="nrx800-relay">
-  <p>NRX\u2011800 relay</p>
-  <h3>Relay</h3>
+  <p>NRX-800 relay</p>
+  <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">boolean</span>
+        </dt>
+        <dd>wanted status of the relay, true = closed, false = open</dd>
+    </dl>
+  <h3>Outputs</h3>
   <dl class="message-properties">
-    <dt>payload <span class="property-type">text</span></dt>
+    <dt>payload <span class="property-type">string</span></dt>
     <dd>true or false representing the relay state</dd>
     <dt>pin <span class="property-type">number</span></dt>
     <dd>GPIO pin number</dd>
@@ -29,12 +36,19 @@
 </script>
 
 <script type="text/html" data-help-name="nrx800-led-user">
-  <p>NRX\u2011800 user led</p>
-  <h3>User led</h3>
+  <p>NRX-800 user led</p>
+  <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">boolean</span>
+        </dt>
+        <dd>wanted status of the user led, true = on, false = off</dd>
+    </dl>
+  <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>payload <span class="property-type">number</span></dt>
     <dd>true or false representing the user led state</dd>
-	<dt>status <span class="property-type">text</span></dt>
+	<dt>status <span class="property-type">string</span></dt>
     <dd>"on" or "off" representing the user led state</dd>
   </dl>
 </script>
