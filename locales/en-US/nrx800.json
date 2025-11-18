@@ -13,7 +13,9 @@
         },
         "common": {
             "number": "Number",
-            "pin": "Pin"
+            "pin": "Pin",
+            "coloron": "Color ON",
+            "coloroff": "Color OFF"
         },
 		"status": {
 			"closed": "Closed",

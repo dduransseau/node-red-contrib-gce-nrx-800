@@ -20,6 +20,26 @@
         <label for="node-input-debounce"><i class="fa fa-filter"></i> <span data-i18n="nrx800.input.debounce">Debounce (ms)</span></label>
         <input type="number" id="node-input-debounce" style="text-align:end; width:75px !important">
     </div>
+    <div class="form-row">
+        <label for="node-input-coloron" class="l-width"><span data-i18n="nrx800.common.coloron">Color ON</span></label>
+        <select id="node-input-coloron" style="width:75px">
+            <option value="green" style="background-color: #55aa88"></option>
+            <option value="yellow" style="background-color: #F9DF31"></option>
+            <option value="blue" style="background-color: #53A3F3"></option>
+            <option value="grey" style="background-color: #d3d3d3"></option>
+            <option value="red" style="background-color: #cc0000"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-coloroff" class="l-width"><span data-i18n="nrx800.common.coloroff">Color ON</span></label>
+        <select id="node-input-coloroff" style="width:75px">
+            <option value="green" style="background-color: #55aa88"></option>
+            <option value="yellow" style="background-color: #F9DF31"></option>
+            <option value="blue" style="background-color: #53A3F3"></option>
+            <option value="grey" style="background-color: #d3d3d3"></option>
+            <option value="red" style="background-color: #cc0000"></option>
+        </select>
+    </div>
 </script>
 <script type='text/javascript'>
     RED.nodes.registerType('nrx800-digital-input', {
@@ -29,7 +49,9 @@
         defaults: {
             name: { value: "" },
             number: { value: "", required:true},
-            debounce: { value: 50 }
+            debounce: { value: 50 },
+            coloron: { value: "green", required:true},
+            coloroff: { value: "grey", required:true},
         },
         inputs: 0,
         outputs: 1,
@@ -43,6 +65,34 @@
             }
             return 'NRX\u2011800 '+this._("nrx800.input.label");
         },
+        oneditprepare: function() {
+            var selectColorOn = $("#node-input-coloron");
+            var selectColorOff = $("#node-input-coloroff");
+            function updateSelectColor(s) {
+                var selectedColor = s.val();
+                s.css("background-color", selectedColor);
+            }
+            function resetSelectStyle(s) {
+                s.css("background-color", "");
+                s.css("color", "");
+            }
+            
+            updateSelectColor(selectColorOn);
+            updateSelectColor(selectColorOff);
+            
+            selectColorOn.on("mousedown", function() { 
+                resetSelectStyle(selectColorOn)
+            });
+            selectColorOn.on("change blur", function() {
+                updateSelectColor(selectColorOn);
+            });
+            selectColorOff.on("mousedown", function() { 
+                resetSelectStyle(selectColorOff)
+            });
+            selectColorOff.on("change blur", function() {
+                updateSelectColor(selectColorOff);
+            });
+        }
     });
 
 </script>
@@ -63,7 +113,27 @@
             <option value="6">6</option>
             <option value="7">7</option>
             <option value="8">8</option>
-            <!-- <option value="msg">On message</option> -->
+            <option value="msg">On message</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-coloron" class="l-width"><span data-i18n="nrx800.common.coloron">Color ON</span></label>
+        <select id="node-input-coloron" style="width:75px">
+            <option value="green" style="background-color: #55aa88"></option>
+            <option value="yellow" style="background-color: #F9DF31"></option>
+            <option value="blue" style="background-color: #53A3F3"></option>
+            <option value="grey" style="background-color: #d3d3d3"></option>
+            <option value="red" style="background-color: #cc0000"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-coloroff" class="l-width"><span data-i18n="nrx800.common.coloroff">Color ON</span></label>
+        <select id="node-input-coloroff" style="width:75px">
+            <option value="green" style="background-color: #55aa88"></option>
+            <option value="yellow" style="background-color: #F9DF31"></option>
+            <option value="blue" style="background-color: #53A3F3"></option>
+            <option value="grey" style="background-color: #d3d3d3"></option>
+            <option value="red" style="background-color: #cc0000"></option>
         </select>
     </div>
 </script>
@@ -78,7 +148,9 @@
             },
             number: {
                 value: "", required:true
-            }
+            },
+            coloron: { value: "green", required:true},
+            coloroff: { value: "grey", required:true},
         },
         inputs: 1,
         outputs: 1,
@@ -90,8 +162,36 @@
             else if (this.number && this.number !== "msg") {
                 return 'NRX\u2011800 ' + this._("nrx800.relay.label") + " " + this.number;
             }
-            return 'NRX\u2011800 '+this._("nrx800.relay.label");
+            return 'NRX\u2011800 '+this._("nrx800.relay.label")+"s";
         },
+        oneditprepare: function() {
+            var selectColorOn = $("#node-input-coloron");
+            var selectColorOff = $("#node-input-coloroff");
+            function updateSelectColor(s) {
+                var selectedColor = s.val();
+                s.css("background-color", selectedColor);
+            }
+            function resetSelectStyle(s) {
+                s.css("background-color", "");
+                s.css("color", "");
+            }
+            
+            updateSelectColor(selectColorOn);
+            updateSelectColor(selectColorOff);
+            
+            selectColorOn.on("mousedown", function() { 
+                resetSelectStyle(selectColorOn)
+            });
+            selectColorOn.on("change blur", function() {
+                updateSelectColor(selectColorOn);
+            });
+            selectColorOff.on("mousedown", function() { 
+                resetSelectStyle(selectColorOff)
+            });
+            selectColorOff.on("change blur", function() {
+                updateSelectColor(selectColorOff);
+            });
+        }
     });
 </script>
 

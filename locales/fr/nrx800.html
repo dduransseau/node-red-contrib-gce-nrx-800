@@ -17,10 +17,11 @@
   <p>Contrôle un relai du NRX-800</p>
   <h3>Entrée</h3>
     <dl class="message-properties">
-        <dt>payload
-            <span class="property-type">boolean</span>
-        </dt>
+        <dt>payload <span class="property-type">boolean</span></dt>
         <dd>l’état souhaité du relai, true = fermé, false = ouvert</dd>
+		<dt>relay (optionnel) <span class="property-type">boolean</span>
+        </dt>
+        <dd>dans le cas ou le numéro de relai est configuré sur "msg", le numéro du relai doit être indiqué via le propriété relay</dd>
     </dl>
   <h3>Sortie</h3>
   <dl class="message-properties">
@@ -33,6 +34,8 @@
 	<dt>status <span class="property-type">string</span></dt>
     <dd>"closed" ou "open" indique l'état du relai</dd>
   </dl>
+  <h3>Détails</h3>
+  <p>Si le numéro du relai est défini sur "msg" l'ensenble des relais sont instanciés par le noeud. Il ne sont donc plus pilotable d'autres noeuds</p>
 </script>
 
 <script type="text/html" data-help-name="nrx800-led-user">

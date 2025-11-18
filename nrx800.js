@@ -43,74 +43,72 @@ module.exports = function(RED) {
 		return l ? false : true
     }
 	
-  function DigitalInputNode(config) {
-    RED.nodes.createNode(this, config);
-    const node = this;
-	this.inputNumber = parseInt(config.number);
-	this.pin = digitalInputNumberPinMapping[config.number];
-	let input;
-	let lastEventTime = performance.now();
-    let lastValue = null;
-    
-    try {
-		node.watcher = Default.watch({ chip: 0, line: node.pin }, Edge.Both);
-		node.watcher.on('change', (value) => {
-			input = value ? false : true;
-			// Debounce
-			const now = performance.now();
-			// console.log(now, now - lastEventTime, config.debounce, value, input);
-			if (now - lastEventTime < config.debounce){
-				return
-			}
-			lastEventTime = now;
-			
-			node.send({
-			  status: digitalInputStatusMapping[input],
-			  pin: node.pin,
-			  input: node.inputNumber,
-			  payload: input
-			});
-			// Mettre à jour le statut visuel
-			node.status({
-			  fill: input ? 'green' : 'grey',
-			  shape: 'dot'
-			});
-		});
-		// Initial read
-		input = node.watcher.value ? false : true;
-		node.status({
-		  fill: input ? 'green' : 'grey',
-		  shape: 'dot'
-		}); 
-    } catch(err) {
-      node.error('GPIO init error: ' + err.message);
-      node.status({fill: 'red', shape: 'ring', text: 'Error'});
-    }
-    
-    node.on('close', function(done) {
-		node.watcher.stop();
-		if (node.watcher) {
-		node.watcher.unexport()
-		  .then(() => done())
-		  .catch(err => {
-			node.error('Cleanup error: ' + err.message);
-			done();
-		  });
-		} else {
-			done();
-		}
-    });
-  }
-  RED.nodes.registerType("nrx800-digital-input", DigitalInputNode);
-  
-  function RelayNode(n) {
-		RED.nodes.createNode(this,n);
-        this.relayNumber = parseInt(n.number);
-        this.pin = relayNumberPinMapping[n.number];
-		var node = this;
+    function DigitalInputNode(config) {
+		RED.nodes.createNode(this, config);
+		const node = this;
+		node.inputNumber = parseInt(config.number);
+		node.pin = digitalInputNumberPinMapping[config.number];
+		node.config = config;
+		let input;
+		let lastEventTime = performance.now();
+		let lastValue = null;
 		
-		node.gpioReady = false;
-		node.pendingValue = null;
+		try {
+			node.watcher = Default.watch({ chip: 0, line: node.pin }, Edge.Both);
+			node.watcher.on('change', (value) => {
+				input = value ? false : true;
+				// Debounce
+				const now = performance.now();
+				// node.log(now, now - lastEventTime, config.debounce, value, input);
+				if (now - lastEventTime < config.debounce){
+					return
+				}
+				lastEventTime = now;
+				
+				node.send({
+				  status: digitalInputStatusMapping[input],
+				  pin: node.pin,
+				  input: node.inputNumber,
+				  payload: input
+				});
+				// Mettre à jour le statut visuel
+				node.status({
+				  fill: input ? node.config.coloron : node.config.coloroff,
+				  shape: 'dot'
+				});
+			});
+			// Initial read
+			input = node.watcher.value ? false : true;
+			node.status({
+			  fill: input ? node.config.coloron : node.config.coloroff,
+			  shape: 'dot'
+			}); 
+		} catch(err) {
+		  node.error('GPIO init error: ' + err.message);
+		  node.status({fill: 'red', shape: 'ring', text: 'Error'});
+		}
+		node.on('close', function(removed, done) {
+			node.watcher.stop();
+			if (node.watcher) {
+			node.watcher.unexport()
+			  .then(() => done())
+			  .catch(err => {
+				node.error('Cleanup error: ' + err.message);
+				done();
+			  });
+			} else {
+				done();
+			}
+		});
+	}
+	RED.nodes.registerType("nrx800-digital-input", DigitalInputNode);
+  
+    function RelayNode(config) {
+		RED.nodes.createNode(this,config);
+		const node = this;
+		node.relayNumber = parseInt(config.number);
+        node.pin = relayNumberPinMapping[config.number];
+		node.config = config;
 		
 		function inputlistener(msg) {
 			const out = msg.payload ? true: false;
@@ -119,57 +117,57 @@ module.exports = function(RED) {
 					// Actionning relay by setting the value of the relay
 					node.relay.value = out;
 					node.send({ relay:node.relayNumber, status:relayStatusMapping[out], pin: node.pin, payload: out});
-					node.status({fill:"grey",shape:"dot",text: out ? "nrx800.status.closed" : "nrx800.status.open"});
+					node.status({fill:out ? node.config.coloron : node.config.coloroff, shape:"dot",text: out ? "nrx800.status.closed" : "nrx800.status.open"});
 				}
 				// Confirm that node is configured to listen on multiple relay to avoid chaotic behavior
-				// else if (msg.relay !== undefined && node.relayNumber === "msg"){
-					// var relayNumber = parseInt(msg.relay)
-					// if (0 < relayNumber < 9){
-						// node.debug("Received message for relay "+ relayNumber)
-						// node.relay = Default.output({ chip: 0, line: relayNumber });
-						// setImmediate(() => {
-							// node.ready = true;
-							// if (node.pendingValue !== null) {
-							  // try {
-								// node.relay.value = node.pendingValue;
-								// node.updateStatus(node.pendingValue);
-								// node.pendingValue = null;
-							  // } catch(err) {
-								// node.error('Failed to set pending value: ' + err.message);
-							  // }
-							// }
-						  // });
-					// } else {
-						// node.warn("Received invalid relay number "+relayNumber);
-						// return
-					// }
-				// }
-				// console.log('Set relay '+ node.relayNumber + " to "+out+" on pin "+node.pin, node.id);
+				else if (msg.relay !== undefined && node.relays !== undefined){
+					const relayNumber = Number.isInteger(msg.relay) ? msg.relay : parseInt(msg.relay);
+					if (0 < relayNumber && relayNumber < 9){
+						node.debug("Received message for relay "+ relayNumber)
+						node.relays[relayNumber].value = out;
+						node.send({ relay:relayNumber, status:relayStatusMapping[out], pin: relayNumberPinMapping[relayNumber.toString()], payload: out});
+						node.status({fill: out ? node.config.coloron : node.config.coloroff, shape:"dot",text: out ? "nrx800.status.closed" : "nrx800.status.open"});
+					} else {
+						node.status({fill: "red", shape:"dot",text: "Invalid relay number"});
+						node.warn("Received invalid relay number "+relayNumber);
+						return
+					}
+				}
 				if (RED.settings.verbose) { node.log("out: "+msg.payload); }
 			}
 			else { node.warn("Invalid value: "+out+" (Supported value are 0,1,true,false)") }
 		}
-		// console.log("Setup relay ", node.relayNumber, "for GPIO", node.pin);
+		
+		// node.log("Setup relay ", node.relayNumber, "for GPIO", node.pin);
 		if (this.pin !== undefined) {
 			node.relay = Default.output({ chip: 0, line: node.pin });
-		} else if (node.number == "msg") {
-			console.log("Setup relay defined at message level");
+		} else if (config.number == "msg") {
+			node.relays = {};
+			for (const [key, value] of Object.entries(relayNumberPinMapping)) {
+				node.relays[parseInt(key)] = Default.output({ chip: 0, line: value });
+			}
 		} else {
-            this.warn(RED._("pi-gpiod:errors.invalidpin")+": "+this.pio);
+            this.warn(RED._("pi-gpiod:errors.invalidpin")+": "+this.pin);
         }
 		this.on("input", inputlistener);
-		this.on('close', (done) => {
-		  node.relay.stop();
-		  done();
+		this.on('close', (removed, done) => {
+			if (node.relay !== undefined) {
+				node.relay.stop();
+			} else if (node.relays !== undefined) {
+				for (const [key, value] of Object.entries(node.relays)) {
+					value.stop();
+				}
+			}
+			done();
 		});
 	}
     RED.nodes.registerType("nrx800-relay",RelayNode);
   
   
-    function LedUser(n) {
-        RED.nodes.createNode(this,n);
-        this.pio = 19;
-        var node = this;
+    function LedUser(config) {
+        RED.nodes.createNode(this,config);
+        const node = this;
+        node.pio = 19;
 
         function inputlistener(msg) {
             if (msg.payload === "on")
@@ -191,7 +189,7 @@ module.exports = function(RED) {
 		node.led.value = true;
         node.on("input", inputlistener);
 
-        node.on("close", function(done) {
+        node.on("close", function(removed, done) {
             node.led.stop();
             done();
         });

@@ -13,7 +13,9 @@
         },
         "common": {
             "number": "Numéro",
-            "pin": "Broche"
+            "pin": "Broche",
+            "coloron": "Couleur ON",
+            "coloroff": "Couleur OFF"
         },
 		"status": {
 			"closed": "Fermé",
@@ -21,6 +23,13 @@
 			"on": "Allumée",
             "off": "Éteinte",
 			"error": "Erreur"
-		}
+		},
+        "color": {
+            "green": "vert",
+            "red": "rouge",
+            "blue": "bleu",
+            "yellow": "jaune",
+            "grey": "gris"
+        }
     }
 }

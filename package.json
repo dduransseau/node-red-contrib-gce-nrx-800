@@ -1,7 +1,8 @@
 {
   "name": "@dduransseau/node-red-contrib-gce-nrx800",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Manage GCE NRX-800 device",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dduransseau/node-red-contrib-gce-nrx-800.git"
